@@ -12,12 +12,14 @@ function getOpenAI() {
 
 function detectGameType(prompt) {
   const lower = prompt.toLowerCase();
-  if (lower.includes('fps') || lower.includes('shooter') || lower.includes('first person')) return 'FPS';
-  if (lower.includes('racing') || lower.includes('driving') || lower.includes('car') || lower.includes('gta')) return 'Racing';
-  if (lower.includes('rpg') || lower.includes('role playing') || lower.includes('quest')) return 'RPG';
-  if (lower.includes('platform') || lower.includes('jump') || lower.includes('side scroll')) return 'Platformer';
-  if (lower.includes('sandbox') || lower.includes('minecraft') || lower.includes('craft')) return 'Sandbox';
-  if (lower.includes('game') || lower.includes('unity') || lower.includes('player') || lower.includes('enemy')) return 'Generic';
+  // Use word-boundary aware patterns to avoid false positives (e.g. "aircraft" matching "craft")
+  const word = (str) => new RegExp(`\\b${str}\\b`).test(lower);
+  if (word('fps') || word('shooter') || /first[- ]person/.test(lower)) return 'FPS';
+  if (word('racing') || word('driving') || word('gta') || /\bcar\s+(game|racing|sim)/.test(lower)) return 'Racing';
+  if (word('rpg') || /role[- ]playing/.test(lower) || word('quest')) return 'RPG';
+  if (word('platformer') || /side[- ]scroll/.test(lower) || /\bplatform\s+(game|level)/.test(lower)) return 'Platformer';
+  if (word('sandbox') || word('minecraft') || /\bcraft(ing)?\s+(game|system|world)/.test(lower)) return 'Sandbox';
+  if (word('game') || word('unity') || word('player') || word('enemy')) return 'Generic';
   return null;
 }
 
